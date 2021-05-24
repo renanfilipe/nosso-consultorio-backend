@@ -1,7 +1,16 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import {
+  Address,
+  HealthPlan,
+  HealthPlanToPatient,
+  HealthPlanToSpecialty,
+  Patient,
+  Specialty,
+} from './entities';
+
 import { ConfigModule } from '@nestjs/config';
 import { Connection } from 'typeorm';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -14,7 +23,14 @@ import { Connection } from 'typeorm';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DATABASE,
       synchronize: true,
-      entities: [],
+      entities: [
+        Address,
+        Patient,
+        HealthPlan,
+        Specialty,
+        HealthPlanToSpecialty,
+        HealthPlanToPatient,
+      ],
     }),
   ],
 })
