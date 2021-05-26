@@ -1,8 +1,11 @@
 export { Address } from './address';
-export { Patient } from './patient';
-export { HealthPlan } from './healthPlan';
-export { Specialty } from './specialty';
-export { HealthPlanToSpecialty } from './healthPlanToSpecialty';
-export { HealthPlanToPatient } from './healthPlanToPatient';
+export { Appointment } from './appointment';
 export { Employee } from './employee';
+export { HealthPlan } from './healthPlan';
 export { HealthPlanToEmployee } from './healthPlanToEmployee';
+export { HealthPlanToPatient } from './healthPlanToPatient';
+export { HealthPlanToSpecialty } from './healthPlanToSpecialty';
+export { Invoice } from './invoice';
+export { Outcome } from './outcome';
+export { Patient } from './patient';
+export { Specialty } from './specialty';

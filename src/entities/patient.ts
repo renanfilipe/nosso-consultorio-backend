@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 
 import { Address } from './address';
+import { Appointment } from './appointment';
 import { HealthPlanToPatient } from './healthPlanToPatient';
 import { v4 as uuid } from 'uuid';
 
@@ -51,4 +52,7 @@ export class Patient {
     (healthPlanToPatient) => healthPlanToPatient.patient,
   )
   healthPlanToPatients: HealthPlanToPatient[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.patient)
+  appointments: Appointment[];
 }
