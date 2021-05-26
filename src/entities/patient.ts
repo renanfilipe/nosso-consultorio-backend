@@ -44,11 +44,11 @@ export class Patient {
 
   @ManyToOne(() => Patient, (patient) => patient.patientId)
   @JoinColumn({ name: 'parentPatientId' })
-  public parentPatientId?: Patient;
+  parentPatientId?: Patient;
 
   @OneToMany(
     () => HealthPlanToPatient,
     (healthPlanToPatient) => healthPlanToPatient.patient,
   )
-  public healthPlanToPatients: HealthPlanToPatient[];
+  healthPlanToPatients: HealthPlanToPatient[];
 }

@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { HealthPlanToEmployee } from './healthPlanToEmployee';
 import { HealthPlanToPatient } from './healthPlanToPatient';
 import { HealthPlanToSpecialty } from './healthPlanToSpecialty';
 import { v4 as uuid } from 'uuid';
@@ -20,7 +21,13 @@ export class HealthPlan {
 
   @OneToMany(
     () => HealthPlanToPatient,
-    (healthPlanToPatient) => healthPlanToPatient.patient,
+    (healthPlanToPatient) => healthPlanToPatient.healthPlan,
   )
   public healthPlanToPatients: HealthPlanToPatient[];
+
+  @OneToMany(
+    () => HealthPlanToEmployee,
+    (healthPlanToEmployee) => healthPlanToEmployee.healthPlan,
+  )
+  public healthPlanToEmployees: HealthPlanToEmployee[];
 }

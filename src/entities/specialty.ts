@@ -1,5 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
+import { Employee } from './employee';
 import { HealthPlanToSpecialty } from './healthPlanToSpecialty';
 import { v4 as uuid } from 'uuid';
 
@@ -19,4 +27,7 @@ export class Specialty {
     (healthPlanToSpecialty) => healthPlanToSpecialty.specialty,
   )
   public healthPlanToSpecialties: HealthPlanToSpecialty[];
+
+  @OneToMany(() => Employee, (employee) => employee.specialty)
+  employees: Employee[];
 }

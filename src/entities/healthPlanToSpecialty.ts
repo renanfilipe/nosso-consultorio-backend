@@ -15,6 +15,9 @@ export class HealthPlanToSpecialty {
   @PrimaryGeneratedColumn('uuid')
   healthPlanToSpecialtyId: string = uuid();
 
+  @Column({ nullable: false })
+  value: number;
+
   @ManyToOne(
     () => HealthPlan,
     (healthPlan) => healthPlan.healthPlanToSpecialties,
@@ -25,7 +28,4 @@ export class HealthPlanToSpecialty {
   @ManyToOne(() => Specialty, (specialty) => specialty.healthPlanToSpecialties)
   @JoinColumn({ name: 'specialtyId' })
   specialty: Specialty;
-
-  @Column({ nullable: false })
-  value: number;
 }

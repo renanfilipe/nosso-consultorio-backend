@@ -1,6 +1,8 @@
 import {
   Address,
+  Employee,
   HealthPlan,
+  HealthPlanToEmployee,
   HealthPlanToPatient,
   HealthPlanToSpecialty,
   Patient,
@@ -30,6 +32,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         Specialty,
         HealthPlanToSpecialty,
         HealthPlanToPatient,
+        Employee,
+        HealthPlanToEmployee,
       ],
     }),
   ],
