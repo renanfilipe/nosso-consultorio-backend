@@ -1,8 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UsePipes,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { CreateSpecialtyDto } from './specialties.dto';
 import { SpecialtiesService } from './specialties.service';
+import { createSpecialtySchema } from './specialties.schema';
 import { Specialty } from 'src/database/entities';
 import { CreateSpecialtyResponse } from './specialties.interface';
+import { JoiValidationPipe } from 'src/pipes/joiValidation.pipe';
 
 @Controller('specialty')
 export class SpecialtiesController {
@@ -14,11 +25,14 @@ export class SpecialtiesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Specialty> {
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<Specialty> {
     return this.specialtiesService.findOne(id);
   }
 
   @Post()
+  @UsePipes(new JoiValidationPipe(createSpecialtySchema))
   async create(
     @Body() createSpecialtyDto: CreateSpecialtyDto,
   ): Promise<CreateSpecialtyResponse> {
@@ -26,7 +40,9 @@ export class SpecialtiesController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
+  async delete(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
     return this.specialtiesService.delete(id);
   }
 }
