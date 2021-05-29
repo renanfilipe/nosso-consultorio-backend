@@ -16,7 +16,7 @@ import { v4 as uuid } from 'uuid';
 @Entity()
 export class Patient {
   @PrimaryGeneratedColumn('uuid')
-  patientId: string = uuid();
+  id: string = uuid();
 
   @Column({ length: 255, nullable: false })
   name: string;
@@ -43,7 +43,7 @@ export class Patient {
   @JoinColumn({ name: 'addressId' })
   address: Address;
 
-  @ManyToOne(() => Patient, (patient) => patient.patientId)
+  @ManyToOne(() => Patient, (patient) => patient.id)
   @JoinColumn({ name: 'parentPatientId' })
   parentPatientId?: Patient;
 

@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid';
 @Entity()
 export class Address {
   @PrimaryGeneratedColumn('uuid')
-  addressId: string = uuid();
+  id: string = uuid();
 
   @Column({ length: 255, nullable: false })
   street: string;

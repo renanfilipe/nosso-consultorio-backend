@@ -17,7 +17,7 @@ import { v4 as uuid } from 'uuid';
 @Entity()
 export class Employee {
   @PrimaryGeneratedColumn('uuid')
-  employeeId: string = uuid();
+  id: string = uuid();
 
   @Column({ length: 255, nullable: false })
   name: string;

@@ -13,7 +13,7 @@ import { v4 as uuid } from 'uuid';
 @Entity()
 export class HealthPlanToEmployee {
   @PrimaryGeneratedColumn('uuid')
-  healthPlanToEmployeeId: string = uuid();
+  id: string = uuid();
 
   @Column({ nullable: false })
   value: number;

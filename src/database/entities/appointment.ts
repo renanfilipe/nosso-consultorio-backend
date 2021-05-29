@@ -16,7 +16,7 @@ import { v4 as uuid } from 'uuid';
 @Entity()
 export class Appointment {
   @PrimaryGeneratedColumn('uuid')
-  appointmentId: string = uuid();
+  id: string = uuid();
 
   @Column({ nullable: false })
   date: Date;

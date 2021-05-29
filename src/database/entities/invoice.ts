@@ -15,7 +15,7 @@ import { v4 as uuid } from 'uuid';
 @Entity()
 export class Invoice {
   @PrimaryGeneratedColumn('uuid')
-  invoiceId: string = uuid();
+  id: string = uuid();
 
   @Column({ nullable: false })
   value: number;

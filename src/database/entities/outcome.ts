@@ -12,7 +12,7 @@ import { v4 as uuid } from 'uuid';
 @Entity()
 export class Outcome {
   @PrimaryGeneratedColumn('uuid')
-  outcomeId: string = uuid();
+  id: string = uuid();
 
   @Column({ length: 1000, nullable: false })
   content: string;

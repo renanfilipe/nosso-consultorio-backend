@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  AfterLoad,
+} from 'typeorm';
 
 import { Employee } from './employee';
 import { HealthPlanToSpecialty } from './healthPlanToSpecialty';
@@ -7,13 +13,16 @@ import { v4 as uuid } from 'uuid';
 @Entity()
 export class Specialty {
   @PrimaryGeneratedColumn('uuid')
-  specialtyId: string = uuid();
+  id: string = uuid();
 
-  @Column({ length: 255, nullable: false })
+  @Column({ length: 255, nullable: false, unique: true })
   name: string;
 
   @Column({ nullable: false })
   value: number;
+
+  @Column({ nullable: false, default: true })
+  isActive: boolean;
 
   @OneToMany(
     () => HealthPlanToSpecialty,
