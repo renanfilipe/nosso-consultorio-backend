@@ -7,12 +7,19 @@ import {
   Post,
   UsePipes,
   ParseUUIDPipe,
+  Put,
 } from '@nestjs/common';
-import { CreateSpecialtyDto } from './specialties.dto';
+import { CreateSpecialtyDto, UpdateSpecialtyDto } from './specialties.dto';
 import { SpecialtiesService } from './specialties.service';
-import { createSpecialtySchema } from './specialties.schema';
+import {
+  createSpecialtySchema,
+  updateSpecialtySchema,
+} from './specialties.schema';
 import { Specialty } from 'src/database/entities';
-import { CreateSpecialtyResponse } from './specialties.interface';
+import {
+  CreateSpecialtyResponse,
+  UpdateSpecialtyResponse,
+} from './specialties.interface';
 import { JoiValidationPipe } from 'src/pipes/joiValidation.pipe';
 
 @Controller('specialty')
@@ -37,6 +44,15 @@ export class SpecialtiesController {
     @Body() createSpecialtyDto: CreateSpecialtyDto,
   ): Promise<CreateSpecialtyResponse> {
     return this.specialtiesService.create(createSpecialtyDto);
+  }
+
+  @Put(':id')
+  @UsePipes(new JoiValidationPipe(updateSpecialtySchema))
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() updateSpecialtyDto: UpdateSpecialtyDto,
+  ): Promise<UpdateSpecialtyResponse> {
+    return this.specialtiesService.update(id, updateSpecialtyDto);
   }
 
   @Delete(':id')

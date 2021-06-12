@@ -2,8 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Specialty } from 'src/database/entities';
 import { Repository } from 'typeorm';
-import { CreateSpecialtyDto } from './specialties.dto';
-import { CreateSpecialtyResponse } from './specialties.interface';
+import { CreateSpecialtyDto, UpdateSpecialtyDto } from './specialties.dto';
+import {
+  CreateSpecialtyResponse,
+  UpdateSpecialtyResponse,
+} from './specialties.interface';
 
 @Injectable()
 export class SpecialtiesService {
@@ -13,13 +16,11 @@ export class SpecialtiesService {
   ) {}
 
   findAll(): Promise<Specialty[]> {
-    return this.specialtiesRepository.find({ where: { isActive: true } });
+    return this.specialtiesRepository.find();
   }
 
   findOne(id: string): Promise<Specialty> {
-    return this.specialtiesRepository.findOne({
-      where: { id, isActive: true },
-    });
+    return this.specialtiesRepository.findOne(id);
   }
 
   async create(
@@ -32,15 +33,15 @@ export class SpecialtiesService {
     if (specialty) {
       if (specialty.isActive) {
         throw new HttpException(
-          'Specialty already exists',
-          HttpStatus.BAD_REQUEST,
+          'There is already a specialty with this name',
+          HttpStatus.CONFLICT,
         );
       }
 
-      specialty.value = createSpecialtyDto.value;
-      specialty.isActive = true;
-      await this.specialtiesRepository.save(specialty);
-      return { id: specialty.id };
+      throw new HttpException(
+        'There is inactive specialty with this name',
+        HttpStatus.CONFLICT,
+      );
     }
 
     const newSpecialty = new Specialty();
@@ -51,10 +52,43 @@ export class SpecialtiesService {
     return { id: newSpecialty.id };
   }
 
-  async delete(id: string): Promise<void> {
-    const specialty = await this.specialtiesRepository.findOne({
-      where: { id, isActive: true },
+  async update(
+    id: string,
+    updateSpecialtyDto: UpdateSpecialtyDto,
+  ): Promise<UpdateSpecialtyResponse> {
+    const specialty = await this.specialtiesRepository.findOne(id);
+
+    if (!specialty) {
+      throw new HttpException('Specialty not found', HttpStatus.NOT_FOUND);
+    }
+
+    const specialtyWithSameName = await this.specialtiesRepository.findOne({
+      where: { name: updateSpecialtyDto.name },
     });
+
+    if (specialtyWithSameName && specialtyWithSameName.id !== specialty.id) {
+      if (!specialtyWithSameName.isActive) {
+        throw new HttpException(
+          'There is inactive specialty with this name',
+          HttpStatus.CONFLICT,
+        );
+      }
+      throw new HttpException(
+        'There is already a specialty with this name',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    specialty.name = updateSpecialtyDto.name;
+    specialty.value = updateSpecialtyDto.value;
+    specialty.isActive = updateSpecialtyDto.isActive;
+    await this.specialtiesRepository.save(specialty);
+
+    return { id: specialty.id };
+  }
+
+  async delete(id: string): Promise<void> {
+    const specialty = await this.specialtiesRepository.findOne(id);
 
     if (!specialty) {
       throw new HttpException('Specialty not found', HttpStatus.NOT_FOUND);
