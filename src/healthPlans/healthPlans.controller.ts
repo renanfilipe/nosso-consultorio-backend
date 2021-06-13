@@ -7,14 +7,26 @@ import {
   Post,
   UsePipes,
   ParseUUIDPipe,
+  Put,
+  Patch,
 } from '@nestjs/common';
-import { CreateHealthPlanDto } from './healthPlans.dto';
+import {
+  CreateHealthPlanDto,
+  PatchHealthPlanDto,
+  UpdateHealthPlanDto,
+} from './healthPlans.dto';
 import { HealthPlansService } from './healthPlans.service';
-import { createHealthPlanSchema } from './healthPlans.schema';
+import {
+  createHealthPlanSchema,
+  patchHealthPlanSchema,
+  updateHealthPlanSchema,
+} from './healthPlans.schema';
 import { HealthPlan } from 'src/database/entities';
 import {
   CreateHealthPlanResponse,
   FindOneHealthPlanResponse,
+  PatchHealthPlanResponse,
+  UpdateHealthPlanResponse,
 } from './healthPlans.interface';
 import { JoiValidationPipe } from 'src/pipes/joiValidation.pipe';
 
@@ -40,6 +52,24 @@ export class HealthPlansController {
     @Body() createHealthPlanDto: CreateHealthPlanDto,
   ): Promise<CreateHealthPlanResponse> {
     return this.healthPlansService.create(createHealthPlanDto);
+  }
+
+  @Put(':id')
+  @UsePipes(new JoiValidationPipe(updateHealthPlanSchema))
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() updateHealthPlanDto: UpdateHealthPlanDto,
+  ): Promise<UpdateHealthPlanResponse> {
+    return this.healthPlansService.update(id, updateHealthPlanDto);
+  }
+
+  @Patch(':id')
+  @UsePipes(new JoiValidationPipe(patchHealthPlanSchema))
+  async patch(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() patchHealthPlanDto: PatchHealthPlanDto,
+  ): Promise<PatchHealthPlanResponse> {
+    return this.healthPlansService.patch(id, patchHealthPlanDto);
   }
 
   @Delete(':id')

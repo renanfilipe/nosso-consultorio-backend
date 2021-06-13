@@ -18,6 +18,9 @@ export class HealthPlanToSpecialty {
   @Column({ nullable: false })
   value: number;
 
+  @Column({ nullable: false, default: true })
+  isActive: boolean;
+
   @ManyToOne(
     () => HealthPlan,
     (healthPlan) => healthPlan.healthPlanToSpecialties,
