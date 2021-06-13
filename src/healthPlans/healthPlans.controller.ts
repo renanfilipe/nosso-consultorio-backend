@@ -12,7 +12,10 @@ import { CreateHealthPlanDto } from './healthPlans.dto';
 import { HealthPlansService } from './healthPlans.service';
 import { createHealthPlanSchema } from './healthPlans.schema';
 import { HealthPlan } from 'src/database/entities';
-import { CreateHealthPlanResponse } from './healthPlans.interface';
+import {
+  CreateHealthPlanResponse,
+  FindOneHealthPlanResponse,
+} from './healthPlans.interface';
 import { JoiValidationPipe } from 'src/pipes/joiValidation.pipe';
 
 @Controller('health-plan')
@@ -27,7 +30,7 @@ export class HealthPlansController {
   @Get(':id')
   async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): Promise<HealthPlan> {
+  ): Promise<FindOneHealthPlanResponse> {
     return this.healthPlansService.findOne(id);
   }
 

@@ -4,7 +4,10 @@ import { HealthPlan, HealthPlanToSpecialty } from 'src/database/entities';
 import { SpecialtiesService } from 'src/specialties/specialties.service';
 import { Repository } from 'typeorm';
 import { CreateHealthPlanDto } from './healthPlans.dto';
-import { CreateHealthPlanResponse } from './healthPlans.interface';
+import {
+  CreateHealthPlanResponse,
+  FindOneHealthPlanResponse,
+} from './healthPlans.interface';
 
 @Injectable()
 export class HealthPlansService {
@@ -20,8 +23,25 @@ export class HealthPlansService {
     return this.healthPlansRepository.find();
   }
 
-  findOne(id: string): Promise<HealthPlan> {
-    return this.healthPlansRepository.findOne(id);
+  async findOne(id: string): Promise<FindOneHealthPlanResponse> {
+    const healthPlan = await this.healthPlansRepository.findOne(id);
+    if (!healthPlan) {
+      throw new HttpException('Health plan not found', HttpStatus.NOT_FOUND);
+    }
+
+    const healthPlanToSpecialty =
+      await this.healthPlansToSpecialtiesRepository.find({
+        where: { healthPlan },
+        loadRelationIds: true,
+      });
+
+    return {
+      ...healthPlan,
+      specialties: healthPlanToSpecialty.map(({ specialty, value }) => ({
+        id: specialty,
+        value,
+      })),
+    };
   }
 
   async create(
