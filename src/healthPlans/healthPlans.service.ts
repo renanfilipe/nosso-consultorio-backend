@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HealthPlan, Specialty } from 'src/database/entities';
+import { HealthPlan, HealthPlanToSpecialty } from 'src/database/entities';
 import { SpecialtiesService } from 'src/specialties/specialties.service';
 import { Repository } from 'typeorm';
 import { CreateHealthPlanDto } from './healthPlans.dto';
@@ -11,6 +11,8 @@ export class HealthPlansService {
   constructor(
     @InjectRepository(HealthPlan)
     private healthPlansRepository: Repository<HealthPlan>,
+    @InjectRepository(HealthPlanToSpecialty)
+    private healthPlansToSpecialtiesRepository: Repository<HealthPlanToSpecialty>,
     private specialtiesService: SpecialtiesService,
   ) {}
 
@@ -45,8 +47,20 @@ export class HealthPlansService {
     const newHealthPlan = new HealthPlan();
     newHealthPlan.name = createHealthPlanDto.name;
     newHealthPlan.isActive = true;
-
     await this.healthPlansRepository.save(newHealthPlan);
+
+    await Promise.all(
+      createHealthPlanDto.specialties.map(async (item) => {
+        const specialty = await this.specialtiesService.findOne(item.id);
+        const healthPlanToSpecialty = new HealthPlanToSpecialty();
+        healthPlanToSpecialty.specialty = specialty;
+        healthPlanToSpecialty.healthPlan = newHealthPlan;
+        healthPlanToSpecialty.value = item.value;
+        await this.healthPlansToSpecialtiesRepository.save(
+          healthPlanToSpecialty,
+        );
+      }),
+    );
 
     return { id: newHealthPlan.id };
   }
