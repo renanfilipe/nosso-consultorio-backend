@@ -12,8 +12,11 @@ export class HealthPlan {
   @PrimaryGeneratedColumn('uuid')
   id: string = uuid();
 
-  @Column({ length: 255, nullable: false })
+  @Column({ length: 255, nullable: false, unique: true })
   name: string;
+
+  @Column({ nullable: false, default: true })
+  isActive: boolean;
 
   @OneToMany(
     () => HealthPlanToSpecialty,
