@@ -46,6 +46,9 @@ export class Employee {
   @Column({ length: 1000, nullable: true })
   tags: string;
 
+  @Column({ nullable: false, default: true })
+  isActive: boolean;
+
   @OneToOne(() => Address)
   @JoinColumn({ name: 'addressId' })
   address: Address;
