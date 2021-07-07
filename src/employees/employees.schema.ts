@@ -40,3 +40,10 @@ export const updateEmployeeSchema = Joi.alternatives(
     street: Joi.string().max(255).required(),
   }),
 );
+
+export const patchEmployeeSchema = Joi.alternatives(
+  Joi.string().uuid({ version: 'uuidv4' }).required(),
+  Joi.object({
+    isActive: Joi.bool().required(),
+  }),
+);

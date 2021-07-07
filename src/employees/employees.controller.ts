@@ -8,13 +8,23 @@ import {
   UsePipes,
   ParseUUIDPipe,
   Put,
+  Patch,
 } from '@nestjs/common';
-import { CreateEmployeeDto, UpdateEmployeeDto } from './employees.dto';
+import {
+  CreateEmployeeDto,
+  PatchEmployeeDto,
+  UpdateEmployeeDto,
+} from './employees.dto';
 import { EmployeesService } from './employees.service';
-import { createEmployeeSchema, updateEmployeeSchema } from './employees.schema';
+import {
+  createEmployeeSchema,
+  patchEmployeeSchema,
+  updateEmployeeSchema,
+} from './employees.schema';
 import { Employee } from 'src/database/entities';
 import {
   CreateEmployeeResponse,
+  PatchEmployeeResponse,
   UpdateEmployeeResponse,
 } from './employees.interface';
 import { JoiValidationPipe } from 'src/pipes/joiValidation.pipe';
@@ -50,6 +60,15 @@ export class EmployeesController {
     @Body() updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<UpdateEmployeeResponse> {
     return this.employeesService.update(id, updateEmployeeDto);
+  }
+
+  @Patch(':id')
+  @UsePipes(new JoiValidationPipe(patchEmployeeSchema))
+  async patch(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() patchEmployeeDto: PatchEmployeeDto,
+  ): Promise<PatchEmployeeResponse> {
+    return this.employeesService.patch(id, patchEmployeeDto);
   }
 
   @Delete(':id')

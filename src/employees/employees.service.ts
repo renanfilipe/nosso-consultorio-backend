@@ -5,7 +5,11 @@ import { Repository } from 'typeorm';
 import { Employee, Address } from 'src/database/entities';
 import { SpecialtiesService } from 'src/specialties/specialties.service';
 
-import { CreateEmployeeDto, UpdateEmployeeDto } from './employees.dto';
+import {
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+  PatchEmployeeDto,
+} from './employees.dto';
 import {
   CreateEmployeeResponse,
   UpdateEmployeeResponse,
@@ -149,6 +153,22 @@ export class EmployeesService {
     employee.gender = updateEmployeeDto.gender;
     employee.address = address;
     employee.specialty = specialty;
+    await this.employeesRepository.save(employee);
+
+    return { id: employee.id };
+  }
+
+  async patch(
+    id: string,
+    patchEmployeeDto: PatchEmployeeDto,
+  ): Promise<UpdateEmployeeResponse> {
+    const employee = await this.employeesRepository.findOne(id);
+
+    if (!employee) {
+      throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
+    }
+
+    employee.isActive = patchEmployeeDto.isActive;
     await this.employeesRepository.save(employee);
 
     return { id: employee.id };

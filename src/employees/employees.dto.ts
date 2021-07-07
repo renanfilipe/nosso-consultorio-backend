@@ -38,3 +38,7 @@ export class UpdateEmployeeDto {
   state: StatesEnum;
   street: string;
 }
+
+export class PatchEmployeeDto {
+  isActive: boolean;
+}
