@@ -1,4 +1,5 @@
-import { StatesEnum } from 'src/database/entities/statesEnum';
+import { StatesEnum } from 'src/database/entities/enums/statesEnum';
+import { GenderEnum } from 'src/database/entities/enums/genderEnum';
 
 export class CreateEmployeeDto {
   birthdate: Date;
@@ -7,7 +8,7 @@ export class CreateEmployeeDto {
   description: string;
   document: string;
   email: string;
-  gender: string;
+  gender: GenderEnum;
   license: string;
   name: string;
   neighborhood: string;
@@ -20,11 +21,20 @@ export class CreateEmployeeDto {
 }
 
 export class UpdateEmployeeDto {
-  name: string;
-  phone: string;
-  email: string;
-  document: string;
-  license: string;
-  photo: string;
+  birthdate: Date;
+  city: string;
+  complement?: string;
   description: string;
+  document: string;
+  email: string;
+  gender: GenderEnum;
+  license: string;
+  name: string;
+  neighborhood: string;
+  number: string;
+  phone: string;
+  photo?: string;
+  specialty: string;
+  state: StatesEnum;
+  street: string;
 }

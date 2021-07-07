@@ -9,7 +9,7 @@ import {
 
 import { Appointment } from './appointment';
 import { HealthPlan } from './healthPlan';
-import { invoiceStatusEnum } from './invoiceStatusEnum';
+import { invoiceStatusEnum } from './enums/invoiceStatusEnum';
 import { v4 as uuid } from 'uuid';
 
 @Entity()

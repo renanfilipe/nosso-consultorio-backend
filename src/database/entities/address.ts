@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-import { StatesEnum } from './statesEnum';
+import { StatesEnum } from './enums/statesEnum';
 import { v4 as uuid } from 'uuid';
 
 @Entity()

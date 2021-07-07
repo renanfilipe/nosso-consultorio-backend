@@ -13,6 +13,7 @@ import { Appointment } from './appointment';
 import { HealthPlanToEmployee } from './healthPlanToEmployee';
 import { Specialty } from './specialty';
 import { v4 as uuid } from 'uuid';
+import { GenderEnum } from './enums/genderEnum';
 
 @Entity()
 export class Employee {
@@ -36,6 +37,9 @@ export class Employee {
 
   @Column({ nullable: false })
   birthdate: Date;
+
+  @Column({ type: 'enum', enum: GenderEnum })
+  gender: GenderEnum;
 
   @Column({ length: 1000, nullable: true })
   description: string;

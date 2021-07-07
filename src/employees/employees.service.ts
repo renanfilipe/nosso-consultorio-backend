@@ -25,8 +25,10 @@ export class EmployeesService {
     return this.employeesRepository.find();
   }
 
-  findOne(id: string): Promise<Employee> {
-    return this.employeesRepository.findOne(id);
+  async findOne(id: string): Promise<Employee> {
+    return this.employeesRepository.findOne(id, {
+      relations: ['address', 'specialty'],
+    });
   }
 
   async create(
@@ -53,7 +55,6 @@ export class EmployeesService {
     const specialty = await this.specialtiesService.findOne(
       createEmployeeDto.specialty,
     );
-
     if (!specialty || !specialty.isActive) {
       throw new HttpException('Specialty not found', HttpStatus.BAD_REQUEST);
     }
@@ -76,6 +77,7 @@ export class EmployeesService {
     newEmployee.name = createEmployeeDto.name;
     newEmployee.phone = createEmployeeDto.phone;
     newEmployee.photo = createEmployeeDto.photo;
+    newEmployee.gender = createEmployeeDto.gender;
     newEmployee.address = newAddress;
     newEmployee.specialty = specialty;
     await this.employeesRepository.save(newEmployee);
@@ -87,37 +89,66 @@ export class EmployeesService {
     id: string,
     updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<UpdateEmployeeResponse> {
-    const employee = await this.employeesRepository.findOne(id);
+    const employee = await this.employeesRepository.findOne(id, {
+      relations: ['address'],
+    });
 
     if (!employee) {
       throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
     }
 
-    const employeeWithSameName = await this.employeesRepository.findOne({
-      where: { name: updateEmployeeDto.name },
+    const employeeWithSameDocument = await this.employeesRepository.findOne({
+      where: { document: updateEmployeeDto.document },
     });
 
-    if (employeeWithSameName && employeeWithSameName.id !== employee.id) {
-      if (!employeeWithSameName.isActive) {
+    if (
+      employeeWithSameDocument &&
+      employeeWithSameDocument.id !== employee.id
+    ) {
+      if (!employeeWithSameDocument.isActive) {
         throw new HttpException(
-          'There is inactive employee with this name',
+          'There is inactive employee with this document number',
           HttpStatus.CONFLICT,
         );
       }
       throw new HttpException(
-        'There is already a employee with this name',
+        'There is already a employee with this document number',
         HttpStatus.CONFLICT,
       );
     }
 
-    employee.name = updateEmployeeDto.name;
-    employee.name = updateEmployeeDto.name;
+    const specialty = await this.specialtiesService.findOne(
+      updateEmployeeDto.specialty,
+    );
+
+    if (!specialty || !specialty.isActive) {
+      throw new HttpException('Specialty not found', HttpStatus.BAD_REQUEST);
+    }
+
+    const address = await this.addressRepository.findOne(employee.address.id);
+    if (!address) {
+      throw new HttpException('Address not found', HttpStatus.BAD_REQUEST);
+    }
+
+    address.city = updateEmployeeDto.city;
+    address.complement = updateEmployeeDto.complement;
+    address.neighborhood = updateEmployeeDto.neighborhood;
+    address.number = updateEmployeeDto.number;
+    address.state = updateEmployeeDto.state;
+    address.street = updateEmployeeDto.street;
+    await this.addressRepository.save(address);
+
+    employee.birthdate = updateEmployeeDto.birthdate;
     employee.description = updateEmployeeDto.description;
     employee.document = updateEmployeeDto.document;
     employee.email = updateEmployeeDto.email;
     employee.license = updateEmployeeDto.license;
+    employee.name = updateEmployeeDto.name;
     employee.phone = updateEmployeeDto.phone;
     employee.photo = updateEmployeeDto.photo;
+    employee.gender = updateEmployeeDto.gender;
+    employee.address = address;
+    employee.specialty = specialty;
     await this.employeesRepository.save(employee);
 
     return { id: employee.id };

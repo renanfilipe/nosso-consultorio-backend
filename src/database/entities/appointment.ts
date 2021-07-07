@@ -10,7 +10,7 @@ import { Employee } from './employee';
 import { HealthPlan } from './healthPlan';
 import { Invoice } from './invoice';
 import { Patient } from './patient';
-import { appointmentStatusEnum } from './appointmentStatusEnum';
+import { appointmentStatusEnum } from './enums/appointmentStatusEnum';
 import { v4 as uuid } from 'uuid';
 
 @Entity()
