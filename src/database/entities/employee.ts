@@ -43,9 +43,6 @@ export class Employee {
   @Column({ length: 255, nullable: true })
   photo: string;
 
-  @Column({ length: 1000, nullable: true })
-  tags: string;
-
   @Column({ nullable: false, default: true })
   isActive: boolean;
 

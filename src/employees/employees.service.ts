@@ -1,7 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Employee } from 'src/database/entities';
 import { Repository } from 'typeorm';
+
+import { Employee, Address } from 'src/database/entities';
+import { SpecialtiesService } from 'src/specialties/specialties.service';
+
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employees.dto';
 import {
   CreateEmployeeResponse,
@@ -13,6 +16,9 @@ export class EmployeesService {
   constructor(
     @InjectRepository(Employee)
     private employeesRepository: Repository<Employee>,
+    @InjectRepository(Address)
+    private addressRepository: Repository<Address>,
+    private specialtiesService: SpecialtiesService,
   ) {}
 
   findAll(): Promise<Employee[]> {
@@ -44,15 +50,34 @@ export class EmployeesService {
       );
     }
 
+    const specialty = await this.specialtiesService.findOne(
+      createEmployeeDto.specialty,
+    );
+
+    if (!specialty || !specialty.isActive) {
+      throw new HttpException('Specialty not found', HttpStatus.BAD_REQUEST);
+    }
+
+    const newAddress = new Address();
+    newAddress.city = createEmployeeDto.city;
+    newAddress.complement = createEmployeeDto.complement;
+    newAddress.neighborhood = createEmployeeDto.neighborhood;
+    newAddress.number = createEmployeeDto.number;
+    newAddress.state = createEmployeeDto.state;
+    newAddress.street = createEmployeeDto.street;
+    await this.addressRepository.save(newAddress);
+
     const newEmployee = new Employee();
-    newEmployee.name = createEmployeeDto.name;
+    newEmployee.birthdate = createEmployeeDto.birthdate;
     newEmployee.description = createEmployeeDto.description;
     newEmployee.document = createEmployeeDto.document;
     newEmployee.email = createEmployeeDto.email;
     newEmployee.license = createEmployeeDto.license;
+    newEmployee.name = createEmployeeDto.name;
     newEmployee.phone = createEmployeeDto.phone;
     newEmployee.photo = createEmployeeDto.photo;
-    newEmployee.tags = createEmployeeDto.tags;
+    newEmployee.address = newAddress;
+    newEmployee.specialty = specialty;
     await this.employeesRepository.save(newEmployee);
 
     return { id: newEmployee.id };
@@ -93,7 +118,6 @@ export class EmployeesService {
     employee.license = updateEmployeeDto.license;
     employee.phone = updateEmployeeDto.phone;
     employee.photo = updateEmployeeDto.photo;
-    employee.tags = updateEmployeeDto.tags;
     await this.employeesRepository.save(employee);
 
     return { id: employee.id };
