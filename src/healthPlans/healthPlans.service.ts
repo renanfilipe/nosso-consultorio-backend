@@ -10,7 +10,6 @@ import {
 } from './healthPlans.dto';
 import {
   CreateHealthPlanResponse,
-  FindOneHealthPlanResponse,
   UpdateHealthPlanResponse,
 } from './healthPlans.interface';
 
@@ -28,25 +27,20 @@ export class HealthPlansService {
     return this.healthPlansRepository.find();
   }
 
-  async findOne(id: string): Promise<FindOneHealthPlanResponse> {
-    const healthPlan = await this.healthPlansRepository.findOne(id);
+  validateExistence(healthPlan: HealthPlan) {
     if (!healthPlan) {
       throw new HttpException('Health plan not found', HttpStatus.NOT_FOUND);
     }
+  }
 
-    const healthPlanToSpecialty =
-      await this.healthPlanToSpecialtiesRepository.find({
-        where: { healthPlan, isActive: true },
-        loadRelationIds: true,
-      });
+  async findOne(id: string): Promise<HealthPlan> {
+    const healthPlan = await this.healthPlansRepository.findOne(id, {
+      relations: ['healthPlanToSpecialties'],
+    });
 
-    return {
-      ...healthPlan,
-      specialties: healthPlanToSpecialty.map(({ specialty, value }) => ({
-        id: specialty,
-        value,
-      })),
-    };
+    this.validateExistence(healthPlan);
+
+    return healthPlan;
   }
 
   async create(
@@ -96,9 +90,7 @@ export class HealthPlansService {
   ): Promise<UpdateHealthPlanResponse> {
     const healthPlan = await this.healthPlansRepository.findOne(id);
 
-    if (!healthPlan) {
-      throw new HttpException('Health plan not found', HttpStatus.NOT_FOUND);
-    }
+    this.validateExistence(healthPlan);
 
     const healthPlanWithSameName = await this.healthPlansRepository.findOne({
       where: { name: updateSpecialtyDto.name },
@@ -123,6 +115,7 @@ export class HealthPlansService {
     const allHealthPlanToSpecialties =
       await this.healthPlanToSpecialtiesRepository.find({
         where: { healthPlan },
+        relations: ['healthPlan'],
       });
 
     await Promise.all(
@@ -164,9 +157,7 @@ export class HealthPlansService {
   ): Promise<UpdateHealthPlanResponse> {
     const healthPlan = await this.healthPlansRepository.findOne(id);
 
-    if (!healthPlan) {
-      throw new HttpException('Health plan not found', HttpStatus.NOT_FOUND);
-    }
+    this.validateExistence(healthPlan);
 
     healthPlan.isActive = patchSpecialtyDto.isActive;
     await this.healthPlansRepository.save(healthPlan);
@@ -179,9 +170,7 @@ export class HealthPlansService {
       where: { id, isActive: true },
     });
 
-    if (!healthPlan) {
-      throw new HttpException('Health plan not found', HttpStatus.NOT_FOUND);
-    }
+    this.validateExistence(healthPlan);
 
     healthPlan.isActive = false;
     await this.healthPlansRepository.save(healthPlan);

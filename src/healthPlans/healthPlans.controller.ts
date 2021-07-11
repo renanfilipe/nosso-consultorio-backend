@@ -24,7 +24,6 @@ import {
 import { HealthPlan } from 'src/database/entities';
 import {
   CreateHealthPlanResponse,
-  FindOneHealthPlanResponse,
   PatchHealthPlanResponse,
   UpdateHealthPlanResponse,
 } from './healthPlans.interface';
@@ -42,7 +41,7 @@ export class HealthPlansController {
   @Get(':id')
   async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): Promise<FindOneHealthPlanResponse> {
+  ): Promise<HealthPlan> {
     return this.healthPlansService.findOne(id);
   }
 

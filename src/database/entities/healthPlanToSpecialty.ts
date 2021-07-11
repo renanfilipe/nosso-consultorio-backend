@@ -24,11 +24,16 @@ export class HealthPlanToSpecialty {
   @ManyToOne(
     () => HealthPlan,
     (healthPlan) => healthPlan.healthPlanToSpecialties,
+    { primary: true },
   )
   @JoinColumn({ name: 'healthPlanId' })
   healthPlan: HealthPlan;
 
-  @ManyToOne(() => Specialty, (specialty) => specialty.healthPlanToSpecialties)
+  @ManyToOne(
+    () => Specialty,
+    (specialty) => specialty.healthPlanToSpecialties,
+    { primary: true, eager: true },
+  )
   @JoinColumn({ name: 'specialtyId' })
   specialty: Specialty;
 }

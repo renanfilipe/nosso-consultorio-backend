@@ -2,7 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Employee, Address } from 'src/database/entities';
+import {
+  Employee,
+  Address,
+  HealthPlanToEmployee,
+  HealthPlan,
+} from 'src/database/entities';
 import { SpecialtiesService } from 'src/specialties/specialties.service';
 
 import {
@@ -22,17 +27,31 @@ export class EmployeesService {
     private employeesRepository: Repository<Employee>,
     @InjectRepository(Address)
     private addressRepository: Repository<Address>,
+    @InjectRepository(HealthPlanToEmployee)
+    private healthPlanToEmployeeRepository: Repository<HealthPlanToEmployee>,
+    @InjectRepository(HealthPlan)
+    private healthPlanRepository: Repository<HealthPlan>,
     private specialtiesService: SpecialtiesService,
   ) {}
+
+  validateExistence(employee: Employee) {
+    if (!employee) {
+      throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
+    }
+  }
 
   findAll(): Promise<Employee[]> {
     return this.employeesRepository.find({ relations: ['specialty'] });
   }
 
   async findOne(id: string): Promise<Employee> {
-    return this.employeesRepository.findOne(id, {
-      relations: ['address', 'specialty'],
+    const employee = await this.employeesRepository.findOne(id, {
+      relations: ['address', 'specialty', 'healthPlanToEmployees'],
     });
+
+    this.validateExistence(employee);
+
+    return employee;
   }
 
   async create(
@@ -59,8 +78,26 @@ export class EmployeesService {
     const specialty = await this.specialtiesService.findOne(
       createEmployeeDto.specialty,
     );
-    if (!specialty || !specialty.isActive) {
+    if (!specialty.isActive) {
       throw new HttpException('Specialty not found', HttpStatus.BAD_REQUEST);
+    }
+
+    const healthPlansToEmployee: HealthPlanToEmployee[] = [];
+    if (createEmployeeDto.healthPlans) {
+      await Promise.all(
+        createEmployeeDto.healthPlans.map(async (item) => {
+          const healthPlan = await this.healthPlanRepository.findOne(item);
+          if (!healthPlan || !healthPlan.isActive) {
+            throw new HttpException(
+              'Health plan not found',
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+          const healthPlanToEmployee = new HealthPlanToEmployee();
+          healthPlanToEmployee.healthPlan = healthPlan;
+          healthPlansToEmployee.push(healthPlanToEmployee);
+        }),
+      );
     }
 
     const newAddress = new Address();
@@ -86,6 +123,15 @@ export class EmployeesService {
     newEmployee.specialty = specialty;
     await this.employeesRepository.save(newEmployee);
 
+    if (healthPlansToEmployee.length > 0) {
+      await Promise.all(
+        healthPlansToEmployee.map(async (healthPlanToEmployee) => {
+          healthPlanToEmployee.employee = newEmployee;
+          await this.healthPlanToEmployeeRepository.save(healthPlanToEmployee);
+        }),
+      );
+    }
+
     return { id: newEmployee.id };
   }
 
@@ -97,9 +143,7 @@ export class EmployeesService {
       relations: ['address'],
     });
 
-    if (!employee) {
-      throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
-    }
+    this.validateExistence(employee);
 
     const employeeWithSameDocument = await this.employeesRepository.findOne({
       where: { document: updateEmployeeDto.document },
@@ -125,8 +169,42 @@ export class EmployeesService {
       updateEmployeeDto.specialty,
     );
 
-    if (!specialty || !specialty.isActive) {
+    if (!specialty.isActive) {
       throw new HttpException('Specialty not found', HttpStatus.BAD_REQUEST);
+    }
+
+    const allHealthPlansToEmployee =
+      await this.healthPlanToEmployeeRepository.find({
+        where: { employee },
+        relations: ['employee'],
+      });
+
+    await Promise.all(
+      allHealthPlansToEmployee.map(async (item) => {
+        item.isActive = false;
+        await this.healthPlanToEmployeeRepository.save(item);
+      }),
+    );
+
+    if (updateEmployeeDto.healthPlans) {
+      await Promise.all(
+        updateEmployeeDto.healthPlans.map(async (item) => {
+          const healthPlan = await this.healthPlanRepository.findOne(item);
+          if (!healthPlan.isActive) {
+            return;
+          }
+
+          const healthPlanToEmployee =
+            (await this.healthPlanToEmployeeRepository.findOne({
+              where: { employee, healthPlan },
+              relations: ['employee'],
+            })) || new HealthPlanToEmployee();
+          healthPlanToEmployee.healthPlan = healthPlan;
+          healthPlanToEmployee.employee = employee;
+          healthPlanToEmployee.isActive = true;
+          await this.healthPlanToEmployeeRepository.save(healthPlanToEmployee);
+        }),
+      );
     }
 
     const address = await this.addressRepository.findOne(employee.address.id);
@@ -164,9 +242,7 @@ export class EmployeesService {
   ): Promise<UpdateEmployeeResponse> {
     const employee = await this.employeesRepository.findOne(id);
 
-    if (!employee) {
-      throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
-    }
+    this.validateExistence(employee);
 
     employee.isActive = patchEmployeeDto.isActive;
     await this.employeesRepository.save(employee);
@@ -177,9 +253,7 @@ export class EmployeesService {
   async delete(id: string): Promise<void> {
     const employee = await this.employeesRepository.findOne(id);
 
-    if (!employee) {
-      throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
-    }
+    this.validateExistence(employee);
 
     employee.isActive = false;
     await this.employeesRepository.save(employee);

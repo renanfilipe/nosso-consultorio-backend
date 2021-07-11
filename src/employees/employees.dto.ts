@@ -9,6 +9,7 @@ export class CreateEmployeeDto {
   document: string;
   email: string;
   gender: GenderEnum;
+  healthPlans?: string[];
   license: string;
   name: string;
   neighborhood: string;
@@ -28,6 +29,7 @@ export class UpdateEmployeeDto {
   document: string;
   email: string;
   gender: GenderEnum;
+  healthPlans?: string[];
   license: string;
   name: string;
   neighborhood: string;

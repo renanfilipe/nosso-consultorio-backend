@@ -8,6 +8,7 @@ export const createEmployeeSchema = Joi.object({
   document: Joi.string().length(11).required(),
   email: Joi.string().email().required(),
   gender: Joi.string().valid('male', 'female').required(),
+  healthPlans: Joi.array().items(Joi.string().uuid({ version: 'uuidv4' })),
   license: Joi.string().max(50).required(),
   name: Joi.string().max(255).required(),
   neighborhood: Joi.string().max(255).required(),
@@ -29,6 +30,9 @@ export const updateEmployeeSchema = Joi.alternatives(
     document: Joi.string().length(11).required(),
     email: Joi.string().email().required(),
     gender: Joi.string().valid('male', 'female').required(),
+    healthPlans: Joi.array()
+      .items(Joi.string().uuid({ version: 'uuidv4' }))
+      .allow(null, ''),
     license: Joi.string().max(50).required(),
     name: Joi.string().max(255).required(),
     neighborhood: Joi.string().max(255).required(),

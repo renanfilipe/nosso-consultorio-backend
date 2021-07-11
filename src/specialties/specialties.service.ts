@@ -15,12 +15,22 @@ export class SpecialtiesService {
     private specialtiesRepository: Repository<Specialty>,
   ) {}
 
+  validateExistence(specialty: Specialty) {
+    if (!specialty) {
+      throw new HttpException('Specialty not found', HttpStatus.NOT_FOUND);
+    }
+  }
+
   findAll(): Promise<Specialty[]> {
     return this.specialtiesRepository.find();
   }
 
-  findOne(id: string): Promise<Specialty> {
-    return this.specialtiesRepository.findOne(id);
+  async findOne(id: string): Promise<Specialty> {
+    const specialty = await this.specialtiesRepository.findOne(id);
+
+    this.validateExistence(specialty);
+
+    return specialty;
   }
 
   async create(
@@ -58,9 +68,7 @@ export class SpecialtiesService {
   ): Promise<UpdateSpecialtyResponse> {
     const specialty = await this.specialtiesRepository.findOne(id);
 
-    if (!specialty) {
-      throw new HttpException('Specialty not found', HttpStatus.NOT_FOUND);
-    }
+    this.validateExistence(specialty);
 
     const specialtyWithSameName = await this.specialtiesRepository.findOne({
       where: { name: updateSpecialtyDto.name },
@@ -90,9 +98,7 @@ export class SpecialtiesService {
   async delete(id: string): Promise<void> {
     const specialty = await this.specialtiesRepository.findOne(id);
 
-    if (!specialty) {
-      throw new HttpException('Specialty not found', HttpStatus.NOT_FOUND);
-    }
+    this.validateExistence(specialty);
 
     specialty.isActive = false;
     await this.specialtiesRepository.save(specialty);
