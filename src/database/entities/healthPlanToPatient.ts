@@ -15,14 +15,20 @@ export class HealthPlanToPatient {
   @PrimaryGeneratedColumn('uuid')
   id: string = uuid();
 
-  @Column({ nullable: false })
+  @Column({ length: 50, nullable: false })
   number: string;
 
-  @ManyToOne(() => HealthPlan, (healthPlan) => healthPlan.healthPlanToPatients)
+  @ManyToOne(
+    () => HealthPlan,
+    (healthPlan) => healthPlan.healthPlanToPatients,
+    { primary: true, eager: true },
+  )
   @JoinColumn({ name: 'healthPlanId' })
   healthPlan: HealthPlan;
 
-  @ManyToOne(() => Patient, (patient) => patient.healthPlanToPatients)
+  @ManyToOne(() => Patient, (patient) => patient.healthPlanToPatients, {
+    primary: true,
+  })
   @JoinColumn({ name: 'patientId' })
   patient: Patient;
 }

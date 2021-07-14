@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import {
   HealthPlan,
   Specialty,
   HealthPlanToSpecialty,
 } from 'src/database/entities';
 import { SpecialtiesModule } from 'src/specialties/specialties.module';
+
 import { HealthPlansController } from './healthPlans.controller';
 import { HealthPlansService } from './healthPlans.service';
 

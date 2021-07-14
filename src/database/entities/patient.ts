@@ -7,11 +7,12 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { v4 as uuid } from 'uuid';
 
 import { Address } from './address';
 import { Appointment } from './appointment';
 import { HealthPlanToPatient } from './healthPlanToPatient';
-import { v4 as uuid } from 'uuid';
+import { GenderEnum } from './enums/genderEnum';
 
 @Entity()
 export class Patient {
@@ -33,11 +34,17 @@ export class Patient {
   @Column({ nullable: false })
   birthdate: Date;
 
+  @Column({ type: 'enum', enum: GenderEnum })
+  gender: GenderEnum;
+
   @Column({ length: 11, nullable: false })
   emergencyPhone: string;
 
   @Column({ length: 1000, nullable: false })
   anamnesis: string;
+
+  @Column({ nullable: false, default: true })
+  isActive: boolean;
 
   @OneToOne(() => Address)
   @JoinColumn({ name: 'addressId' })

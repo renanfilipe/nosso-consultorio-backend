@@ -1,53 +1,42 @@
 import * as Joi from '@hapi/joi';
 
-export const createEmployeeSchema = Joi.object({
+export const createPatientSchema = Joi.object({
+  anamnesis: Joi.string().max(500),
   birthdate: Joi.date().required(),
   city: Joi.string().max(255).required(),
   complement: Joi.string().max(255),
-  description: Joi.string().max(1000),
   document: Joi.string().length(11).required(),
   email: Joi.string().email().required(),
+  emergencyPhone: Joi.string().min(10).max(11).required(),
   gender: Joi.string().valid('male', 'female').required(),
-  healthPlans: Joi.array().items(Joi.string().uuid({ version: 'uuidv4' })),
-  license: Joi.string().max(50).required(),
   name: Joi.string().max(255).required(),
   neighborhood: Joi.string().max(255).required(),
   number: Joi.string().max(255).required(),
+  parent: Joi.string().uuid({ version: 'uuidv4' }),
   phone: Joi.string().min(10).max(11).required(),
-  photo: Joi.string().max(1000),
-  specialty: Joi.string().uuid({ version: 'uuidv4' }).required(),
   state: Joi.string().length(2).required(),
   street: Joi.string().max(255).required(),
+  healthPlan: Joi.string().uuid({ version: 'uuidv4' }),
+  healthPlanNumber: Joi.string().max(50),
 });
 
-export const updateEmployeeSchema = Joi.alternatives(
+export const updatePatientSchema = Joi.alternatives(
   Joi.string().uuid({ version: 'uuidv4' }).required(),
   Joi.object({
+    anamnesis: Joi.string().max(500),
     birthdate: Joi.date().required(),
     city: Joi.string().max(255).required(),
-    complement: Joi.string().max(255).allow(null, ''),
-    description: Joi.string().max(1000).allow(null, ''),
+    complement: Joi.string().max(255),
     document: Joi.string().length(11).required(),
     email: Joi.string().email().required(),
+    emergencyPhone: Joi.string().min(10).max(11).required(),
     gender: Joi.string().valid('male', 'female').required(),
-    healthPlans: Joi.array()
-      .items(Joi.string().uuid({ version: 'uuidv4' }))
-      .allow(null, ''),
-    license: Joi.string().max(50).required(),
     name: Joi.string().max(255).required(),
     neighborhood: Joi.string().max(255).required(),
     number: Joi.string().max(255).required(),
+    parentId: Joi.string().uuid({ version: 'uuidv4' }),
     phone: Joi.string().min(10).max(11).required(),
-    photo: Joi.string().max(1000).allow(null, ''),
-    specialty: Joi.string().uuid({ version: 'uuidv4' }).required(),
     state: Joi.string().length(2).required(),
     street: Joi.string().max(255).required(),
-  }),
-);
-
-export const patchEmployeeSchema = Joi.alternatives(
-  Joi.string().uuid({ version: 'uuidv4' }).required(),
-  Joi.object({
-    isActive: Joi.bool().required(),
   }),
 );

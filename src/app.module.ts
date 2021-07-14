@@ -2,7 +2,8 @@ import { Connection } from 'typeorm';
 import { Module } from '@nestjs/common';
 import { SpecialtiesModule } from './specialties/specialties.module';
 import { HealthPlansModule } from './healthPlans/healthPlans.module';
-import { EmployeesModule } from './Employees/Employees.module';
+import { EmployeesModule } from './employees/employees.module';
+import { PatientsModule } from './patients/patients.module';
 import { DatabaseModule } from './database/database.module';
 
 @Module({
@@ -10,6 +11,7 @@ import { DatabaseModule } from './database/database.module';
     SpecialtiesModule,
     HealthPlansModule,
     EmployeesModule,
+    PatientsModule,
     DatabaseModule,
   ],
 })

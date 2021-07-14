@@ -58,19 +58,19 @@ export class EmployeesService {
     createEmployeeDto: CreateEmployeeDto,
   ): Promise<CreateEmployeeResponse> {
     const employee = await this.employeesRepository.findOne({
-      where: { name: createEmployeeDto.name },
+      where: { document: createEmployeeDto.document },
     });
 
     if (employee) {
       if (employee.isActive) {
         throw new HttpException(
-          'There is already an employee with this name',
+          'There is already an employee with this document number',
           HttpStatus.CONFLICT,
         );
       }
 
       throw new HttpException(
-        'There is an inactive employee with this name',
+        'There is an inactive employee with this document number',
         HttpStatus.CONFLICT,
       );
     }
