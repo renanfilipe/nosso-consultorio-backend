@@ -17,8 +17,10 @@ export class CreatePatientDto {
   phone: string;
   state: StatesEnum;
   street: string;
-  healthPlan?: string;
-  healthPlanNumber?: string;
+  healthPlans?: {
+    id: string;
+    number: string;
+  }[];
 }
 
 export class UpdatePatientDto {

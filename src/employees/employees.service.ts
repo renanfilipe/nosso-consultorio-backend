@@ -123,7 +123,7 @@ export class EmployeesService {
     newEmployee.specialty = specialty;
     await this.employeesRepository.save(newEmployee);
 
-    if (healthPlansToEmployee.length > 0) {
+    if (healthPlansToEmployee.length) {
       await Promise.all(
         healthPlansToEmployee.map(async (healthPlanToEmployee) => {
           healthPlanToEmployee.employee = newEmployee;

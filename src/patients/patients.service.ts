@@ -84,15 +84,23 @@ export class PatientsService {
       }
     }
 
-    let healthPlan: HealthPlan = null;
-    if (createPatientDto.healthPlan) {
-      healthPlan = await this.healthPlansService.findOne(
-        createPatientDto.healthPlan,
+    const healthPlansToPatient: HealthPlanToPatient[] = [];
+    if (createPatientDto.healthPlans) {
+      await Promise.all(
+        createPatientDto.healthPlans.map(async (item) => {
+          const healthPlan = await this.healthPlansService.findOne(item.id);
+          if (!healthPlan.isActive) {
+            throw new HttpException(
+              'Health plan not found',
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+          const healthPlanToPatient = new HealthPlanToPatient();
+          healthPlanToPatient.healthPlan = healthPlan;
+          healthPlanToPatient.number = item.number;
+          healthPlansToPatient.push(healthPlanToPatient);
+        }),
       );
-
-      if (!healthPlan.isActive) {
-        throw new HttpException('Health plan not found', HttpStatus.NOT_FOUND);
-      }
     }
 
     const newAddress = new Address();
@@ -117,12 +125,13 @@ export class PatientsService {
     newPatient.phone = createPatientDto.phone;
     await this.patientsRepository.save(newPatient);
 
-    if (healthPlan) {
-      const healthPlanToPatient = new HealthPlanToPatient();
-      healthPlanToPatient.number = createPatientDto.healthPlanNumber;
-      healthPlanToPatient.patient = newPatient;
-      healthPlanToPatient.healthPlan = healthPlan;
-      this.healthPlanToPatientRepository.save(healthPlanToPatient);
+    if (healthPlansToPatient.length) {
+      await Promise.all(
+        healthPlansToPatient.map(async (healthPlanToPatient) => {
+          healthPlanToPatient.patient = newPatient;
+          await this.healthPlanToPatientRepository.save(healthPlanToPatient);
+        }),
+      );
     }
 
     return { id: newPatient.id };

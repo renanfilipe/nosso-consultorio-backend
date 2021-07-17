@@ -16,8 +16,12 @@ export const createPatientSchema = Joi.object({
   phone: Joi.string().min(10).max(11).required(),
   state: Joi.string().length(2).required(),
   street: Joi.string().max(255).required(),
-  healthPlan: Joi.string().uuid({ version: 'uuidv4' }),
-  healthPlanNumber: Joi.string().max(50),
+  healthPlans: Joi.array().items(
+    Joi.object({
+      id: Joi.string().uuid({ version: 'uuidv4' }).required(),
+      number: Joi.string().max(50).required(),
+    }),
+  ),
 });
 
 export const updatePatientSchema = Joi.alternatives(
