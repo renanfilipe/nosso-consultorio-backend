@@ -40,7 +40,7 @@ export class Patient {
   @Column({ length: 11, nullable: false })
   emergencyPhone: string;
 
-  @Column({ length: 1000, nullable: false })
+  @Column({ length: 1000, nullable: true })
   anamnesis: string;
 
   @Column({ nullable: false, default: true })

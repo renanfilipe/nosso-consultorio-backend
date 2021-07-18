@@ -13,7 +13,7 @@ export class CreatePatientDto {
   name: string;
   neighborhood: string;
   number: string;
-  parent?: string;
+  parentPatientId?: string;
   phone: string;
   state: StatesEnum;
   street: string;
@@ -23,25 +23,7 @@ export class CreatePatientDto {
   }[];
 }
 
-export class UpdatePatientDto {
-  anamnesis?: string;
-  birthdate: Date;
-  city: string;
-  complement?: string;
-  document: string;
-  email: string;
-  emergencyPhone: string;
-  gender: GenderEnum;
-  name: string;
-  neighborhood: string;
-  number: string;
-  parent?: string;
-  phone: string;
-  state: StatesEnum;
-  street: string;
-  healthPlan?: string;
-  healthPlanNumber?: string;
-}
+export class UpdatePatientDto extends CreatePatientDto {}
 
 export class PatchPatientDto {
   isActive: boolean;

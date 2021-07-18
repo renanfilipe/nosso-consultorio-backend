@@ -75,11 +75,13 @@ export class PatientsService {
       );
     }
 
-    let parent: Patient = null;
-    if (createPatientDto.parent) {
-      parent = await this.patientsRepository.findOne(createPatientDto.parent);
+    let parentPatient: Patient = null;
+    if (createPatientDto.parentPatientId) {
+      parentPatient = await this.patientsRepository.findOne(
+        createPatientDto.parentPatientId,
+      );
 
-      if (!parent || !parent.isActive) {
+      if (!parentPatient || !parentPatient.isActive) {
         throw new HttpException('Parent not found', HttpStatus.NOT_FOUND);
       }
     }
@@ -121,7 +123,7 @@ export class PatientsService {
     newPatient.emergencyPhone = createPatientDto.emergencyPhone;
     newPatient.gender = createPatientDto.gender;
     newPatient.name = createPatientDto.name;
-    newPatient.parentPatientId = parent;
+    newPatient.parentPatientId = parentPatient;
     newPatient.phone = createPatientDto.phone;
     await this.patientsRepository.save(newPatient);
 
@@ -141,7 +143,9 @@ export class PatientsService {
     id: string,
     updatePatientDto: UpdatePatientDto,
   ): Promise<UpdatePatientResponse> {
-    const patient = await this.patientsRepository.findOne(id);
+    const patient = await this.patientsRepository.findOne(id, {
+      relations: ['address', 'parentPatientId'],
+    });
 
     this.validateExistence(patient);
 
@@ -162,27 +166,76 @@ export class PatientsService {
       );
     }
 
-    let parent: Patient = null;
-    if (updatePatientDto.parent) {
-      parent = await this.patientsRepository.findOne(updatePatientDto.parent);
+    let parentPatient: Patient = null;
+    if (updatePatientDto.parentPatientId) {
+      parentPatient = await this.patientsRepository.findOne(
+        updatePatientDto.parentPatientId,
+      );
 
-      if (!parent || !parent.isActive) {
+      if (!parentPatient || !parentPatient.isActive) {
         throw new HttpException('Parent not found', HttpStatus.NOT_FOUND);
       }
     }
 
-    let healthPlan: HealthPlan = null;
-    if (updatePatientDto.healthPlan) {
-      healthPlan = await this.healthPlansService.findOne(
-        updatePatientDto.healthPlan,
-      );
+    const allHealthPlansToPatient =
+      await this.healthPlanToPatientRepository.find({
+        where: { patient },
+        relations: ['patient'],
+      });
 
-      if (!healthPlan.isActive) {
-        throw new HttpException('Health plan not found', HttpStatus.NOT_FOUND);
-      }
+    await Promise.all(
+      allHealthPlansToPatient.map(async (item) => {
+        item.isActive = false;
+        await this.healthPlanToPatientRepository.save(item);
+      }),
+    );
+
+    if (updatePatientDto.healthPlans) {
+      await Promise.all(
+        updatePatientDto.healthPlans.map(async (item) => {
+          const healthPlan = await this.healthPlansService.findOne(item.id);
+          if (!healthPlan.isActive) {
+            return;
+          }
+
+          const healthPlanToPatient =
+            (await this.healthPlanToPatientRepository.findOne({
+              where: { patient, healthPlan },
+              relations: ['patient'],
+            })) || new HealthPlanToPatient();
+          healthPlanToPatient.healthPlan = healthPlan;
+          healthPlanToPatient.patient = patient;
+          healthPlanToPatient.number = item.number;
+          healthPlanToPatient.isActive = true;
+          await this.healthPlanToPatientRepository.save(healthPlanToPatient);
+        }),
+      );
     }
 
+    const address = await this.addressRepository.findOne(patient.address.id);
+    if (!address) {
+      throw new HttpException('Address not found', HttpStatus.BAD_REQUEST);
+    }
+
+    address.city = updatePatientDto.city;
+    address.complement = updatePatientDto.complement;
+    address.neighborhood = updatePatientDto.neighborhood;
+    address.number = updatePatientDto.number;
+    address.state = updatePatientDto.state;
+    address.street = updatePatientDto.street;
+    await this.addressRepository.save(address);
+
+    patient.address = address;
+    patient.anamnesis = updatePatientDto.anamnesis;
+    patient.birthdate = updatePatientDto.birthdate;
+    patient.document = updatePatientDto.document;
+    patient.email = updatePatientDto.email;
+    patient.emergencyPhone = updatePatientDto.emergencyPhone;
+    patient.gender = updatePatientDto.gender;
     patient.name = updatePatientDto.name;
+    patient.parentPatientId = parentPatient;
+    patient.phone = updatePatientDto.phone;
+
     await this.patientsRepository.save(patient);
 
     return { id: patient.id };
