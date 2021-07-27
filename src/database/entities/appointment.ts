@@ -28,6 +28,9 @@ export class Appointment {
   @JoinColumn({ name: 'patientId' })
   patient: Patient;
 
+  @Column({ length: 500, nullable: true })
+  additionalInfo: string;
+
   @ManyToOne(() => Employee, (employee) => employee.appointments)
   @JoinColumn({ name: 'employeeId' })
   employee: Employee;

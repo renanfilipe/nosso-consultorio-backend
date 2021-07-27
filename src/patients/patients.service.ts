@@ -2,12 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import {
-  Address,
-  HealthPlan,
-  HealthPlanToPatient,
-  Patient,
-} from 'src/database/entities';
+import { Address, HealthPlanToPatient, Patient } from 'src/database/entities';
 import { HealthPlansService } from 'src/healthPlans/healthPlans.service';
 
 import {
